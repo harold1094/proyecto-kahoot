@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Esperando... - Quiz Live</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <meta http-equiv="refresh" content="3">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Background Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="w-full max-w-md text-center">
+        <div class="card-glass p-12 rounded-2xl shadow-2xl flex flex-col items-center">
+            
+            <div class="relative size-24 mb-6">
+                 <!-- Pulse Ring -->
+                 <div class="absolute inset-0 rounded-full bg-primary/30 animate-ping"></div>
+                 <div class="relative w-full h-full flex items-center justify-center bg-primary rounded-full shadow-lg">
+                    <span class="material-symbols-outlined text-4xl text-white">hourglass_empty</span>
+                 </div>
+            </div>
+
+            <h1 class="text-3xl font-extrabold mb-2">¡Todo listo!</h1>
+            <p class="text-white/60 mb-8">Mira la pantalla del profesor</p>
+
+            <div class="bg-white/5 rounded-xl p-4 w-full border border-white/10">
+                <p class="text-xs uppercase tracking-widest text-white/50 mb-1">Tu Jugador</p>
+                <p class="text-xl font-bold text-white neon-glow" th:text="${player.nickname}">Jugador</p>
+                <p class="text-xs text-white/30 font-mono mt-1">ID: <span th:text="${playerId}">#</span></p>
+            </div>
+            
+            <p class="text-sm text-white/40 mt-6 animate-pulse">Esperando a que empiece la partida...</p>
+
+            <script>
+                // Fallback auto-reload
+                setTimeout(function(){
+                   window.location.reload();
+                }, 3000);
+            </script>
+        </div>
+    </div>
+
+</body>
+</html>

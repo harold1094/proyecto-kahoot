@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>QuizLive - Responde</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="bg-background-light dark:bg-background-dark text-white min-h-screen flex flex-col">
+    <!-- Top Bar -->
+    <header class="w-full border-b border-white/10 px-4 py-3 flex items-center justify-between bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+             <div class="size-10 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">person</span>
+             </div>
+             <span class="text-sm font-bold" th:text="${player.nickname}">Jugador</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-white/60 text-sm font-medium">Pregunta</span>
+            <span class="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-bold">
+                <span th:text="${questionNumber}">1</span>/<span th:text="${totalQuestions}">10</span>
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full p-4 flex flex-col gap-6 max-w-2xl mx-auto">
+        
+        <!-- Timer Bar -->
+        <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+            <div id="timerBar" class="h-full bg-gradient-to-r from-primary to-purple-500 transition-all duration-1000 ease-linear" style="width: 100%"></div>
+        </div>
+        
+        <!-- Question Card -->
+        <div class="card-glass p-6 rounded-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 rounded-full blur-[60px]"></div>
+            <div class="relative z-10">
+                <p class="text-white/50 text-xs uppercase tracking-widest mb-2">Pregunta <span th:text="${questionNumber}">1</span></p>
+                <h2 class="text-xl md:text-2xl font-bold leading-tight" th:text="${currentQuestion.statement}">
+                    ¿Cuál es la pregunta de ejemplo?
+                </h2>
+            </div>
+        </div>
+
+        <!-- Options Grid -->
+        <div class="grid grid-cols-1 gap-3 flex-1">
+            <!-- Option 0: Red -->
+            <form th:action="@{/play/answer}" method="post">
+                <input type="hidden" name="playerId" th:value="${player.id}" />
+                <input type="hidden" name="optionIndex" value="0" />
+                <button type="submit" class="w-full bg-quiz-red/90 hover:bg-quiz-red glow-red rounded-xl p-4 flex items-center gap-4 transition-all active:scale-[0.98] shadow-lg group text-left">
+                    <span class="material-symbols-outlined text-2xl text-white/80 group-hover:text-white filled-icon">change_history</span>
+                    <span class="text-white font-medium text-lg" th:text="${currentQuestion.options[0]}">Opción A</span>
+                </button>
+            </form>
+
+            <!-- Option 1: Blue -->
+            <form th:action="@{/play/answer}" method="post">
+                <input type="hidden" name="playerId" th:value="${player.id}" />
+                <input type="hidden" name="optionIndex" value="1" />
+                <button type="submit" class="w-full bg-quiz-blue/90 hover:bg-quiz-blue glow-blue rounded-xl p-4 flex items-center gap-4 transition-all active:scale-[0.98] shadow-lg group text-left">
+                    <span class="material-symbols-outlined text-2xl text-white/80 group-hover:text-white filled-icon">pentagon</span>
+                    <span class="text-white font-medium text-lg" th:text="${currentQuestion.options[1]}">Opción B</span>
+                </button>
+            </form>
+
+            <!-- Option 2: Yellow -->
+            <form th:action="@{/play/answer}" method="post">
+                <input type="hidden" name="playerId" th:value="${player.id}" />
+                <input type="hidden" name="optionIndex" value="2" />
+                <button type="submit" class="w-full bg-quiz-yellow/90 hover:bg-quiz-yellow glow-yellow rounded-xl p-4 flex items-center gap-4 transition-all active:scale-[0.98] shadow-lg group text-left">
+                    <span class="material-symbols-outlined text-2xl text-white/80 group-hover:text-white filled-icon">circle</span>
+                    <span class="text-white font-medium text-lg" th:text="${currentQuestion.options[2]}">Opción C</span>
+                </button>
+            </form>
+
+            <!-- Option 3: Green -->
+            <form th:action="@{/play/answer}" method="post">
+                <input type="hidden" name="playerId" th:value="${player.id}" />
+                <input type="hidden" name="optionIndex" value="3" />
+                <button type="submit" class="w-full bg-quiz-green/90 hover:bg-quiz-green glow-green rounded-xl p-4 flex items-center gap-4 transition-all active:scale-[0.98] shadow-lg group text-left">
+                    <span class="material-symbols-outlined text-2xl text-white/80 group-hover:text-white filled-icon">square</span>
+                    <span class="text-white font-medium text-lg" th:text="${currentQuestion.options[3]}">Opción D</span>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Timer Script -->
+    <script th:inline="javascript">
+        const timeLimit = /*[[${timeLimit}]]*/ 20;
+        const playerId = /*[[${player.id}]]*/ 0;
+        const timerBar = document.getElementById('timerBar');
+        let timeLeft = timeLimit;
+        let answered = false;
+        
+        // Marcar como respondido cuando se hace click en cualquier botón
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', () => { answered = true; });
+        });
+        
+        function updateTimer() {
+            timeLeft -= 0.1;
+            const percentage = (timeLeft / timeLimit) * 100;
+            timerBar.style.width = percentage + '%';
+            
+            // Cambiar color cuando queda poco tiempo
+            if (percentage < 30) {
+                timerBar.classList.remove('from-primary', 'to-purple-500');
+                timerBar.classList.add('from-red-500', 'to-orange-500');
+            }
+            
+            if (timeLeft > 0) {
+                setTimeout(updateTimer, 100);
+            } else if (!answered) {
+                // Tiempo agotado sin responder -> Enviar respuesta incorrecta automáticamente
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/play/answer';
+                
+                const playerInput = document.createElement('input');
+                playerInput.type = 'hidden';
+                playerInput.name = 'playerId';
+                playerInput.value = playerId;
+                form.appendChild(playerInput);
+                
+                const optionInput = document.createElement('input');
+                optionInput.type = 'hidden';
+                optionInput.name = 'optionIndex';
+                optionInput.value = '-1'; // Opción inválida = incorrecta
+                form.appendChild(optionInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+        
+        updateTimer();
+    </script>
+
+    <!-- Background Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-[20%] left-[10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[100px]"></div>
+    </div>
+</body>
+</html>

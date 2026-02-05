@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Mis Quizzes - Quiz Live Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <header class="flex items-center justify-between px-8 py-4 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
+        <div class="flex items-center gap-3">
+            <div class="size-8 text-primary">
+                <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill="currentColor" fill-rule="evenodd"></path></svg>
+            </div>
+            <h1 class="text-xl font-bold">Quiz Live <span class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full ml-2">Admin</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+             <div class="size-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/50">
+                <span class="material-symbols-outlined text-sm">person</span>
+             </div>
+        </div>
+    </header>
+
+    <main class="flex-1 container mx-auto p-8 max-w-5xl">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-3xl font-bold tracking-tight">Mis Quizzes</h2>
+                <p class="text-white/60">Gestiona y lanza tus juegos desde aquí</p>
+            </div>
+            <a th:href="@{/blocks/new}" class="group flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-primary/25">
+                <span class="material-symbols-outlined group-hover:rotate-90 transition-transform">add</span>
+                <span class="hidden sm:inline">Crear Nuevo Quiz</span>
+            </a>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${blocks.empty}" class="card-glass p-12 text-center rounded-2xl border-dashed border-2 border-white/10 flex flex-col items-center gap-4">
+            <div class="size-20 bg-white/5 rounded-full flex items-center justify-center mb-2">
+                <span class="material-symbols-outlined text-4xl text-white/20">library_add</span>
+            </div>
+            <h3 class="text-xl font-bold">No tienes quizzes creados</h3>
+            <p class="text-white/50 max-w-md mx-auto">Crea tu primer bloque de preguntas para empezar a jugar con tu audiencia.</p>
+        </div>
+
+        <!-- Grid of Quizzes -->
+        <div th:unless="${blocks.empty}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="block : ${blocks}" class="card-glass group p-6 rounded-2xl relative hover:border-primary/50 transition-all hover:-translate-y-1">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="size-12 rounded-lg bg-gradient-to-br from-primary/20 to-purple-900/20 flex items-center justify-center text-primary border border-white/5">
+                        <span class="material-symbols-outlined">quiz</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <a th:href="@{/blocks/edit/{id}(id=${block.id})}" class="p-2 hover:bg-white/10 rounded-lg text-white/60 hover:text-white transition-colors" title="Editar">
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                        </a>
+                        <a th:href="@{/blocks/delete/{id}(id=${block.id})}" onclick="return confirm('¿Eliminar este quiz?')" class="p-2 hover:bg-red-500/10 rounded-lg text-white/60 hover:text-red-400 transition-colors" title="Eliminar">
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-2 truncate" th:text="${block.name}">Nombre del Quiz</h3>
+                <p class="text-sm text-white/50 line-clamp-2 h-10 mb-4" th:text="${block.description}">Descripción...</p>
+                
+                <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-white/40 bg-white/5 px-2 py-1 rounded-md" th:text="${block.questions.size()} + ' PREGUNTAS'">0 PREGUNTAS</span>
+                    
+                    <a th:href="@{/game/config/{id}(id=${block.id})}" class="flex items-center gap-2 text-primary hover:text-white font-bold text-sm transition-colors">
+                        <span class="material-symbols-outlined text-lg filled-icon">play_arrow</span>
+                        JUGAR
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

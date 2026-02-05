@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Entrar al juego - Quiz Live</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Background Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-[20%] left-[10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold tracking-tight mb-2">Quiz Live</h1>
+            <p class="text-white/60">Introduce el PIN para unirte a la partida</p>
+        </div>
+
+        <div class="card-glass p-8 rounded-2xl shadow-2xl">
+            <form th:action="@{/play/join}" method="post" class="flex flex-col gap-6">
+                
+                <div>
+                    <label class="block text-sm font-medium text-white/70 mb-2 uppercase tracking-wider">PIN del Juego</label>
+                    <input type="text" name="pin" required 
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-center text-2xl font-bold tracking-[0.2em] focus:ring-2 focus:ring-primary focus:border-transparent placeholder-white/20 transition-all"
+                           placeholder="000 000" />
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-white/70 mb-2 uppercase tracking-wider">Tu Apodo</label>
+                    <input type="text" name="nickname" required 
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-center text-xl font-medium focus:ring-2 focus:ring-primary focus:border-transparent placeholder-white/20 transition-all"
+                           placeholder="Ej. MasterQuiz" />
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl text-lg shadow-lg hover:shadow-primary/50 transition-all active:scale-[0.98]">
+                    ¡ENTRAR!
+                </button>
+            </form>
+        </div>
+
+        <!-- Error Alert -->
+        <div th:if="${param.error}" class="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-200 animate__animated animate__shakeX">
+            <span class="material-symbols-outlined text-red-500">error</span>
+            <span class="font-medium">PIN incorrecto o error de conexión.</span>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Configurar Partida - Quiz Live Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="flex items-center justify-between px-8 py-4 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
+        <div class="flex items-center gap-3">
+             <a th:href="@{/blocks}" class="hover:bg-white/10 p-2 rounded-lg transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+             </a>
+             <h1 class="text-xl font-bold">Configurar Partida</h1>
+        </div>
+    </header>
+
+    <main class="flex-1 container mx-auto p-8 max-w-2xl">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-black tracking-tight mb-2">Lanzar Quiz</h2>
+            <p class="text-white/60 text-lg">Bloque: <span class="text-primary font-semibold" th:text="${block.name}">Nombre del Bloque</span></p>
+            <p class="text-white/40 text-sm mt-1"><span th:text="${block.questions.size()}">0</span> preguntas disponibles</p>
+        </div>
+
+        <form th:action="@{/game/create}" th:object="${configForm}" method="post" class="w-full card-glass p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+            <!-- Decorative Glow -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-[80px]"></div>
+
+            <div class="relative z-10 space-y-8">
+                <input type="hidden" th:field="*{blockId}" />
+                
+                <!-- Time Limit -->
+                <div>
+                     <label class="block text-sm font-bold text-white/80 mb-4 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">timer</span>
+                        Tiempo por Pregunta
+                     </label>
+                     
+                     <div class="grid grid-cols-4 gap-3">
+                         <!-- Option 10s -->
+                         <label class="cursor-pointer">
+                             <input type="radio" th:field="*{timeLimit}" value="10" class="peer sr-only" />
+                             <div class="bg-white/5 border border-white/10 rounded-xl py-3 text-center peer-checked:bg-primary peer-checked:border-primary peer-checked:shadow-lg transition-all hover:bg-white/10 font-bold">
+                                 10s
+                             </div>
+                         </label>
+                         
+                         <!-- Option 15s -->
+                         <label class="cursor-pointer">
+                             <input type="radio" th:field="*{timeLimit}" value="15" class="peer sr-only" />
+                             <div class="bg-white/5 border border-white/10 rounded-xl py-3 text-center peer-checked:bg-primary peer-checked:border-primary peer-checked:shadow-lg transition-all hover:bg-white/10 font-bold">
+                                 15s
+                             </div>
+                         </label>
+                         
+                         <!-- Option 20s -->
+                         <label class="cursor-pointer">
+                             <input type="radio" th:field="*{timeLimit}" value="20" class="peer sr-only" />
+                             <div class="bg-white/5 border border-white/10 rounded-xl py-3 text-center peer-checked:bg-primary peer-checked:border-primary peer-checked:shadow-lg transition-all hover:bg-white/10 font-bold">
+                                 20s
+                             </div>
+                         </label>
+                         
+                         <!-- Option 30s -->
+                         <label class="cursor-pointer">
+                             <input type="radio" th:field="*{timeLimit}" value="30" class="peer sr-only" />
+                             <div class="bg-white/5 border border-white/10 rounded-xl py-3 text-center peer-checked:bg-primary peer-checked:border-primary peer-checked:shadow-lg transition-all hover:bg-white/10 font-bold">
+                                 30s
+                             </div>
+                         </label>
+                     </div>
+                </div>
+
+                <!-- Question Selection Mode -->
+                <div>
+                    <label class="block text-sm font-bold text-white/80 mb-4 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">quiz</span>
+                        Modo de Selección de Preguntas
+                    </label>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <!-- Manual Mode -->
+                        <label class="cursor-pointer">
+                            <input type="radio" th:field="*{randomMode}" value="false" class="peer sr-only" id="modeManual" onclick="toggleMode(false)" checked />
+                            <div class="bg-white/5 border border-white/10 rounded-xl p-4 text-center peer-checked:bg-primary/20 peer-checked:border-primary transition-all hover:bg-white/10">
+                                <span class="material-symbols-outlined text-3xl mb-2 block">checklist</span>
+                                <span class="font-bold block">Manual</span>
+                                <span class="text-xs text-white/50">Elige las preguntas</span>
+                            </div>
+                        </label>
+                        
+                        <!-- Random Mode -->
+                        <label class="cursor-pointer">
+                            <input type="radio" th:field="*{randomMode}" value="true" class="peer sr-only" id="modeRandom" onclick="toggleMode(true)" />
+                            <div class="bg-white/5 border border-white/10 rounded-xl p-4 text-center peer-checked:bg-primary/20 peer-checked:border-primary transition-all hover:bg-white/10">
+                                <span class="material-symbols-outlined text-3xl mb-2 block">shuffle</span>
+                                <span class="font-bold block">Aleatorio</span>
+                                <span class="text-xs text-white/50">Selección al azar</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Random Mode Options -->
+                <div id="randomOptions" class="hidden">
+                    <label class="block text-sm font-bold text-white/80 mb-4 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">tag</span>
+                        Número de Preguntas Aleatorias
+                    </label>
+                    <input type="number" th:field="*{numQuestionsRandom}" min="1" th:max="${block.questions.size()}" 
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-medium focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="Ej: 10" />
+                    <p class="text-white/40 text-xs mt-2">Máximo: <span th:text="${block.questions.size()}">0</span> preguntas</p>
+                </div>
+
+                <!-- Manual Mode - Question Selection -->
+                <div id="manualOptions">
+                    <label class="block text-sm font-bold text-white/80 mb-4 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">check_box</span>
+                        Seleccionar Preguntas
+                    </label>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-white/60 text-sm">Preguntas seleccionadas: <span id="selectedCount" class="text-primary font-bold">0</span></span>
+                        <button type="button" onclick="selectAll()" class="text-primary text-sm hover:underline">Seleccionar todas</button>
+                    </div>
+                    
+                    <div class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                        <div th:each="question, iterStat : ${block.questions}" class="question-item">
+                            <label class="flex items-start gap-3 p-4 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
+                                <input type="checkbox" th:name="selectedQuestionIds" th:value="${question.id}" 
+                                       class="mt-1 h-5 w-5 rounded border-white/20 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0 focus:ring-offset-transparent question-checkbox"
+                                       onchange="updateCount()" />
+                                <div class="flex-1">
+                                    <span class="text-white/40 text-xs font-mono">#<span th:text="${iterStat.count}">1</span></span>
+                                    <p class="text-white font-medium group-hover:text-primary transition-colors" th:text="${question.statement}">Pregunta de ejemplo</p>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div th:if="${#lists.isEmpty(block.questions)}" class="text-center py-8 text-white/30">
+                            Este bloque no tiene preguntas aún.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full h-16 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white text-xl font-black rounded-2xl shadow-xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3">
+                    <span class="material-symbols-outlined text-3xl">rocket_launch</span>
+                    CREAR SALA
+                </button>
+            </div>
+        </form>
+        
+        <p class="text-white/30 text-xs mt-6 text-center">Al crear la sala se generará un PIN único.</p>
+    </main>
+
+    <script>
+        function toggleMode(isRandom) {
+            const randomOptions = document.getElementById('randomOptions');
+            const manualOptions = document.getElementById('manualOptions');
+            
+            if (isRandom) {
+                randomOptions.classList.remove('hidden');
+                manualOptions.classList.add('hidden');
+            } else {
+                randomOptions.classList.add('hidden');
+                manualOptions.classList.remove('hidden');
+            }
+        }
+        
+        function updateCount() {
+            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
+            document.getElementById('selectedCount').textContent = checkboxes.length;
+        }
+        
+        function selectAll() {
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            const allChecked = [...checkboxes].every(cb => cb.checked);
+            
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+            updateCount();
+        }
+        
+        // Init: Check radio button state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const randomRadio = document.getElementById('modeRandom');
+            if (randomRadio && randomRadio.checked) {
+                toggleMode(true);
+            }
+            updateCount();
+        });
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(127,13,242,0.5);
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(127,13,242,0.8);
+        }
+    </style>
+
+</body>
+</html>

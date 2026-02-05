@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Respuesta Enviada - Quiz Live</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Background Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-[10%] left-[20%] w-[60%] h-[60%] rounded-full blur-[120px]"
+             th:classappend="${isCorrect} ? 'bg-green-500/20' : 'bg-red-500/20'"></div>
+    </div>
+
+    <div class="w-full max-w-md text-center">
+        <!-- Result Icon -->
+        <div class="mb-6 animate-bounce">
+            <!-- Correcto -->
+            <span th:if="${isCorrect}" class="material-symbols-outlined text-8xl text-green-400 filled-icon drop-shadow-lg">check_circle</span>
+            <!-- Incorrecto -->
+            <span th:unless="${isCorrect}" class="material-symbols-outlined text-8xl text-red-400 filled-icon drop-shadow-lg">cancel</span>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card-glass p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-16 -right-16 w-32 h-32 rounded-full blur-[60px]"
+                 th:classappend="${isCorrect} ? 'bg-green-500/20' : 'bg-red-500/20'"></div>
+            
+            <div class="relative z-10">
+                <!-- Resultado -->
+                <h1 th:if="${isCorrect}" class="text-3xl font-black tracking-tight mb-2 text-green-400">¡Correcto!</h1>
+                <h1 th:unless="${isCorrect}" class="text-3xl font-black tracking-tight mb-2 text-red-400">¡Incorrecto!</h1>
+                
+                <p class="text-white/60 mb-6">Tu respuesta ha sido registrada</p>
+                
+                <!-- Waiting Animation -->
+                <div class="bg-white/5 rounded-xl p-6 mb-6">
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <div class="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                        <div class="w-3 h-3 bg-primary rounded-full animate-pulse delay-1"></div>
+                        <div class="w-3 h-3 bg-primary rounded-full animate-pulse delay-2"></div>
+                    </div>
+                    <p class="text-white/50 text-sm">Esperando a que el profesor pase a la siguiente pregunta...</p>
+                </div>
+
+                <!-- Tip -->
+                <div class="flex items-center justify-center gap-2 text-white/40 text-sm">
+                    <span class="material-symbols-outlined text-lg">tv</span>
+                    <span>Mira la pantalla principal</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status message -->
+        <p id="status" class="mt-6 text-white/30 text-xs">Comprobando siguiente pregunta...</p>
+    </div>
+
+    <style>
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce {
+            animation: bounce 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .animate-pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+    </style>
+
+    <!-- Auto-refresh: vuelve al juego cada 2 segundos para ver si hay nueva pregunta -->
+    <script th:inline="javascript">
+        const playerId = /*[[${playerId}]]*/ 0;
+        
+        // Polling: cada 2 segundos vuelve a la pantalla del juego
+        setInterval(() => {
+            window.location.href = '/play/game/' + playerId;
+        }, 2000);
+    </script>
+
+</body>
+</html>

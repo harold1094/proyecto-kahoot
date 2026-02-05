@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>¡Quiz Completado! - Quiz Live</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Background Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-[10%] left-[20%] w-[60%] h-[60%] bg-primary/20 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[10%] right-[10%] w-[40%] h-[40%] bg-yellow-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="w-full max-w-md text-center">
+        <!-- Celebration Icon based on position -->
+        <div class="mb-6 animate-bounce">
+            <!-- Primer puesto -->
+            <span th:if="${position == 1}" class="material-symbols-outlined text-8xl text-yellow-400 filled-icon drop-shadow-lg">emoji_events</span>
+            <!-- Segundo puesto -->
+            <span th:if="${position == 2}" class="material-symbols-outlined text-8xl text-gray-300 filled-icon drop-shadow-lg">military_tech</span>
+            <!-- Tercer puesto -->
+            <span th:if="${position == 3}" class="material-symbols-outlined text-8xl text-amber-600 filled-icon drop-shadow-lg">workspace_premium</span>
+            <!-- Resto de posiciones -->
+            <span th:if="${position > 3}" class="material-symbols-outlined text-8xl text-primary filled-icon drop-shadow-lg">check_circle</span>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card-glass p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-16 -right-16 w-32 h-32 bg-primary/20 rounded-full blur-[60px]"></div>
+            
+            <div class="relative z-10">
+                <h1 class="text-3xl font-black tracking-tight mb-2">¡Quiz Completado!</h1>
+                <p class="text-white/60 mb-6">Has respondido todas las preguntas</p>
+                
+                <!-- Position Display -->
+                <div class="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-2xl p-6 mb-4">
+                    <p class="text-white/60 text-sm uppercase tracking-widest mb-2">Tu Posición</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="text-6xl font-black" 
+                              th:classappend="${position == 1} ? 'text-yellow-400' : (${position == 2} ? 'text-gray-300' : (${position == 3} ? 'text-amber-600' : 'text-primary'))"
+                              th:text="${position}">1</span>
+                        <span class="text-2xl text-white/40 font-medium">de <span th:text="${totalPlayers}">10</span></span>
+                    </div>
+                </div>
+                
+                <!-- Score Display -->
+                <div class="bg-gradient-to-br from-primary/20 to-purple-600/20 border border-primary/30 rounded-2xl p-6 mb-6">
+                    <p class="text-white/60 text-sm uppercase tracking-widest mb-2">Tu Puntuación</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="text-5xl font-black text-primary neon-glow" th:text="${player.score}">0</span>
+                        <span class="text-xl text-white/40 font-medium">pts</span>
+                    </div>
+                </div>
+
+                <!-- Player Info -->
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <div class="size-12 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">person</span>
+                    </div>
+                    <div class="text-left">
+                        <p class="font-bold" th:text="${player.nickname}">Jugador</p>
+                        <p class="text-white/40 text-sm" th:if="${position == 1}">🏆 ¡Campeón!</p>
+                        <p class="text-white/40 text-sm" th:if="${position == 2}">🥈 ¡Segundo lugar!</p>
+                        <p class="text-white/40 text-sm" th:if="${position == 3}">🥉 ¡Tercer lugar!</p>
+                        <p class="text-white/40 text-sm" th:if="${position > 3}">¡Buen trabajo!</p>
+                    </div>
+                </div>
+
+                <!-- Message -->
+                <div class="flex items-center justify-center gap-2 text-white/50 text-sm">
+                    <span class="material-symbols-outlined text-lg">tv</span>
+                    <span>Mira la pantalla principal para ver el ranking final</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fun message -->
+        <p class="text-white/30 text-xs mt-6">
+            🎉 ¡Gracias por jugar!
+        </p>
+    </div>
+
+    <style>
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce {
+            animation: bounce 2s ease-in-out infinite;
+        }
+    </style>
+
+</body>
+</html>

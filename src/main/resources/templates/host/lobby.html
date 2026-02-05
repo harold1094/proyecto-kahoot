@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Lobby del Quiz en Vivo</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Custom Tailwind Config -->
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <!-- Refresco automático -->
+    <meta http-equiv="refresh" content="3">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen">
+    <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+        <!-- Top Navigation Bar -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-6 py-4 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+            <div class="flex items-center gap-4 text-white">
+                <div class="size-8 text-primary">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path clip-rule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill="currentColor" fill-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h2 class="text-white text-xl font-bold leading-tight tracking-tight">Quiz en Vivo <span class="text-xs font-normal text-primary bg-primary/20 px-2 py-0.5 rounded-full ml-2 uppercase tracking-widest">Host</span></h2>
+            </div>
+            <div class="flex flex-1 justify-end gap-6 items-center">
+                 <form th:action="@{/blocks}" class="inline">
+                    <button class="flex items-center justify-center rounded-xl h-10 w-10 bg-white/5 hover:bg-white/10 text-white transition-all" title="Salir">
+                        <span class="material-symbols-outlined">logout</span>
+                    </button>
+                 </form>
+            </div>
+        </header>
+
+        <main class="flex flex-1 flex-col items-center justify-start py-12 px-4">
+            <div class="max-w-[1000px] w-full flex flex-col gap-10">
+                <!-- Headline & Invitation Card -->
+                <div class="flex flex-col items-center gap-8">
+                    <div class="text-center">
+                        <h1 class="text-white tracking-tight text-4xl md:text-5xl font-extrabold leading-tight">¡Prepárate para el Quiz!</h1>
+                        <p class="text-white/60 text-lg mt-2">Comparte el código con tu audiencia para que se unan</p>
+                    </div>
+                    <div class="w-full max-w-2xl">
+                        <div class="card-glass p-8 rounded-xl shadow-2xl relative overflow-hidden group">
+                            <!-- Subtle glow background -->
+                            <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-[80px]"></div>
+                            <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                                <div class="flex flex-col items-center md:items-start gap-1">
+                                    <p class="text-white/60 text-sm font-medium uppercase tracking-widest">Únete en tu navegador</p>
+                                    <p class="text-white tracking-tighter text-7xl font-black leading-none neon-glow my-2" th:text="${room.pin}">000 000</p>
+                                    <p class="text-primary text-base font-semibold leading-normal">Código de Acceso</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Players Section -->
+                <div class="flex flex-col gap-6">
+                    <div class="flex items-center justify-between px-4">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-white text-2xl font-bold tracking-tight">Jugadores conectados</h2>
+                            <span class="bg-primary/20 text-primary text-sm font-bold px-3 py-1 rounded-full" th:text="${room.players.size()}">0</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-white/50 text-sm italic">
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            Esperando más jugadores...
+                        </div>
+                    </div>
+
+                    <!-- Avatar Group Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 px-4">
+                        <div th:each="player : ${room.players}" class="flex flex-col items-center gap-2 group animate__animated animate__fadeIn">
+                             <!-- Placeholder Avatar -->
+                             <div class="bg-primary/20 border-2 border-primary/50 group-hover:border-primary transition-all rounded-full size-20 shadow-lg flex items-center justify-center">
+                                 <span class="material-symbols-outlined text-4xl text-primary">person</span>
+                             </div>
+                             <span class="text-white/80 text-sm font-medium" th:text="${player.nickname}">Nombre</span>
+                        </div>
+                        
+                        <div th:if="${room.players.empty}" class="col-span-full text-center py-8 text-white/30">
+                            Aún no hay nadie...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Action Button -->
+                <div class="flex flex-col items-center justify-center pb-12">
+                     <form th:action="@{/game/start}" method="post" class="w-full max-w-md">
+                        <input type="hidden" name="pin" th:value="${room.pin}" />
+                        <button type="submit" class="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-20 bg-primary text-white gap-4 text-2xl font-black transition-all hover:scale-[1.02] active:scale-95 shadow-[0_20px_50px_rgba(127,13,242,0.3)]">
+                            <span class="material-symbols-outlined text-3xl">play_circle</span>
+                            EMPEZAR JUEGO
+                            <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </button>
+                    </form>
+                    <p class="text-white/40 text-sm mt-4">Solo tú puedes iniciar la partida</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Dynamic Background Elements -->
+        <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+            <div class="absolute top-[10%] left-[-5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]"></div>
+        </div>
+    </div>
+</body>
+</html>

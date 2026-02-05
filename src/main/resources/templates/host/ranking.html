@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>🏆 Ranking Final - Quiz Live</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen overflow-hidden">
+    
+    <!-- Confetti Animation -->
+    <div id="confetti" class="fixed inset-0 pointer-events-none z-50"></div>
+    
+    <!-- Background Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-[10%] left-[20%] w-[60%] h-[60%] bg-yellow-500/20 rounded-full blur-[150px] animate-pulse"></div>
+        <div class="absolute bottom-[10%] right-[10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[100px]"></div>
+    </div>
+    
+    <div class="relative flex min-h-screen flex-col items-center justify-start p-4 md:p-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-8 animate-fade-in">
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-2">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400">
+                    🏆 PODIO FINAL 🏆
+                </span>
+            </h1>
+            <p class="text-white/50 text-lg">¡Estos son los campeones!</p>
+        </div>
+
+        <!-- Visual Podium for Top 3 -->
+        <div class="flex items-end justify-center gap-2 md:gap-4 mb-8 w-full max-w-2xl" th:if="${#lists.size(players) >= 1}">
+            
+            <!-- 2nd Place (Left) -->
+            <div class="flex flex-col items-center flex-1 animate-slide-up" style="animation-delay: 0.3s" th:if="${#lists.size(players) >= 2}">
+                <div class="relative mb-2">
+                    <div class="size-16 md:size-20 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-lg border-4 border-gray-200">
+                        <span class="text-2xl md:text-3xl">🥈</span>
+                    </div>
+                </div>
+                <p class="text-lg md:text-xl font-bold text-center truncate max-w-full" th:text="${players[1].nickname}">2do</p>
+                <p class="text-gray-300 font-black text-xl md:text-2xl" th:text="${players[1].score} + ' pts'">0 pts</p>
+                <div class="w-full h-24 md:h-32 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-xl mt-2 flex items-center justify-center shadow-xl">
+                    <span class="text-4xl md:text-5xl font-black text-gray-700">2</span>
+                </div>
+            </div>
+            
+            <!-- 1st Place (Center - Tallest) -->
+            <div class="flex flex-col items-center flex-1 animate-slide-up" style="animation-delay: 0.1s">
+                <div class="relative mb-2">
+                    <div class="absolute -top-6 left-1/2 -translate-x-1/2 text-4xl animate-bounce">👑</div>
+                    <div class="size-20 md:size-28 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-2xl border-4 border-yellow-300 ring-4 ring-yellow-400/50">
+                        <span class="text-3xl md:text-4xl">🥇</span>
+                    </div>
+                </div>
+                <p class="text-xl md:text-2xl font-black text-center truncate max-w-full text-yellow-400" th:text="${players[0].nickname}">1ro</p>
+                <p class="text-yellow-300 font-black text-2xl md:text-3xl neon-glow" th:text="${players[0].score} + ' pts'">0 pts</p>
+                <div class="w-full h-32 md:h-44 bg-gradient-to-t from-yellow-500 to-yellow-400 rounded-t-xl mt-2 flex items-center justify-center shadow-2xl">
+                    <span class="text-5xl md:text-6xl font-black text-yellow-900">1</span>
+                </div>
+            </div>
+            
+            <!-- 3rd Place (Right) -->
+            <div class="flex flex-col items-center flex-1 animate-slide-up" style="animation-delay: 0.5s" th:if="${#lists.size(players) >= 3}">
+                <div class="relative mb-2">
+                    <div class="size-14 md:size-18 rounded-full bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center shadow-lg border-4 border-amber-500">
+                        <span class="text-xl md:text-2xl">🥉</span>
+                    </div>
+                </div>
+                <p class="text-base md:text-lg font-bold text-center truncate max-w-full" th:text="${players[2].nickname}">3ro</p>
+                <p class="text-amber-400 font-black text-lg md:text-xl" th:text="${players[2].score} + ' pts'">0 pts</p>
+                <div class="w-full h-16 md:h-24 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-xl mt-2 flex items-center justify-center shadow-xl">
+                    <span class="text-3xl md:text-4xl font-black text-amber-900">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rest of Players Table -->
+        <div class="w-full max-w-3xl card-glass rounded-2xl p-4 md:p-6 shadow-2xl animate-fade-in" style="animation-delay: 0.7s" th:if="${#lists.size(players) > 3}">
+            <h2 class="text-lg font-bold text-white/60 mb-4 text-center">Resto de participantes</h2>
+            <div class="overflow-hidden rounded-xl border border-white/10">
+                <table class="w-full text-left border-collapse">
+                    <tbody class="divide-y divide-white/5">
+                        <tr th:each="player, stats : ${players}" 
+                            th:if="${stats.index >= 3}"
+                            class="group hover:bg-white/5 transition-colors">
+                            
+                            <!-- Position -->
+                            <td class="p-3 text-center w-16">
+                                <span class="text-white/50 font-bold" th:text="${stats.index + 1}">4</span>
+                            </td>
+                            
+                            <!-- Name -->
+                            <td class="p-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-8 rounded-full bg-white/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-sm">person</span>
+                                    </div>
+                                    <span class="font-medium" th:text="${player.nickname}">Nombre</span>
+                                </div>
+                            </td>
+                            
+                            <!-- Score -->
+                            <td class="p-3 text-right">
+                                <span class="font-bold text-primary" th:text="${player.score} + ' pts'">0 pts</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="mt-8 animate-fade-in" style="animation-delay: 1s">
+            <a th:href="@{/blocks}" class="flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-500 transition-all font-bold text-lg shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-95">
+                <span class="material-symbols-outlined">home</span>
+                Volver al Inicio
+            </a>
+        </div>
+    </div>
+
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(100px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        .animate-slide-up {
+            animation: slide-up 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        /* Confetti Styles */
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 20px;
+            top: -20px;
+            animation: confetti-fall 3s linear infinite;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+
+    <!-- Confetti Script -->
+    <script>
+        const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96E6A1', '#DDA0DD', '#F0E68C'];
+        const confettiContainer = document.getElementById('confetti');
+        
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random() * 100 + 'vw';
+                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    piece.style.animationDelay = Math.random() * 0.5 + 's';
+                    confettiContainer.appendChild(piece);
+                    
+                    setTimeout(() => piece.remove(), 5000);
+                }, i * 30);
+            }
+        }
+        
+        // Launch confetti on load
+        createConfetti();
+        
+        // Repeat confetti every 5 seconds
+        setInterval(createConfetti, 5000);
+    </script>
+
+</body>
+</html>

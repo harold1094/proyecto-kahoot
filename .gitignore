@@ -1,0 +1,19 @@
+# Ignorar archivos compilados y temporales
+target/
+*.class
+*.jar
+*.war
+
+# Ignorar configuración de IDE
+.idea/
+*.iml
+.settings/
+.project
+.classpath
+
+# Ignorar logs
+*.log
+
+# Ignorar archivos del sistema
+.DS_Store
+Thumbs.db

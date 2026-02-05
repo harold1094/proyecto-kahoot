@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Editor de Quiz - Quiz Live Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="flex items-center justify-between px-8 py-4 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
+        <div class="flex items-center gap-3">
+             <a th:href="@{/blocks}" class="hover:bg-white/10 p-2 rounded-lg transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+             </a>
+             <h1 class="text-xl font-bold">Editor de Quiz</h1>
+        </div>
+    </header>
+
+    <main class="flex-1 container mx-auto p-8 max-w-3xl">
+        <form th:action="@{/blocks/save}" th:object="${block}" method="post" class="flex flex-col gap-8">
+            <input type="hidden" th:field="*{id}" />
+
+            <!-- Header Card (Name & Description) -->
+            <div class="card-glass p-8 rounded-2xl shadow-xl space-y-6">
+                <div>
+                     <label class="block text-sm font-medium text-white/70 mb-2 uppercase tracking-wider">Nombre del Quiz</label>
+                     <input type="text" th:field="*{name}" required
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-2xl font-bold focus:ring-2 focus:ring-primary focus:border-transparent placeholder-white/20 transition-all"
+                            placeholder="Ej. Matemáticas Básicas" />
+                </div>
+                <div>
+                     <label class="block text-sm font-medium text-white/70 mb-2 uppercase tracking-wider">Descripción</label>
+                     <textarea th:field="*{description}" rows="2"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-primary focus:border-transparent placeholder-white/20 transition-all resize-none"
+                            placeholder="Una breve descripción de lo que trata este quiz..."></textarea>
+                </div>
+            </div>
+
+            <!-- Questions List -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">format_list_bulleted</span>
+                        Preguntas
+                    </h3>
+                    <a th:href="@{/questions/new/{blockId}(blockId=${block.id})}" th:if="${block.id != null}" 
+                       class="text-sm font-bold text-primary hover:text-white transition-colors flex items-center gap-1 uppercase tracking-wide">
+                        <span class="material-symbols-outlined text-lg">add_circle</span>
+                        Añadir Pregunta
+                    </a>
+                </div>
+
+                <div th:if="${block.questions.empty}" class="p-8 border-2 border-dashed border-white/10 rounded-2xl text-center">
+                    <p class="text-white/40">No hay preguntas todavía.</p>
+                    <p class="text-xs text-white/30" th:if="${block.id == null}">Guarda el quiz primero para añadir preguntas.</p>
+                </div>
+
+                <div th:unless="${block.questions.empty}" class="space-y-3">
+                    <div th:each="question, stat : ${block.questions}" class="card-glass p-4 rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors group">
+                        <div class="flex items-center gap-4 overflow-hidden">
+                             <div class="size-8 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm flex-shrink-0" th:text="${stat.index + 1}">1</div>
+                             <p class="font-medium truncate" th:text="${question.statement}">Enunciado</p>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a th:href="@{/questions/edit/{id}(id=${question.id})}" class="p-2 hover:bg-primary/20 text-primary rounded-lg transition-colors">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                            <a th:href="@{/questions/delete/{id}(id=${question.id}, blockId=${block.id})}" onclick="return confirm('¿Borrar pregunta?')" class="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
+                                <span class="material-symbols-outlined">delete</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Footer -->
+            <div class="flex items-center justify-end gap-4 pt-4 border-t border-white/10">
+                <a th:href="@{/blocks}" class="text-white/60 hover:text-white font-medium transition-colors">Cancelar</a>
+                <button type="submit" class="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-95">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
