@@ -29,6 +29,12 @@ public class GameController {
         com.quizlive.model.Block block = blockService.getBlockById(blockId);
         if(block == null) return "redirect:/blocks";
         
+        // Verificar que el bloque pertenece al usuario actual
+        User currentUser = userService.getCurrentUser();
+        if (block.getOwner() == null || !block.getOwner().getId().equals(currentUser.getId())) {
+            return "redirect:/blocks";
+        }
+        
         // Objeto DTO para el formulario
         com.quizlive.dto.GameConfigForm form = new com.quizlive.dto.GameConfigForm();
         form.setBlockId(blockId);
@@ -36,13 +42,14 @@ public class GameController {
         
         model.addAttribute("configForm", form);
         model.addAttribute("block", block);
+        model.addAttribute("currentUser", currentUser);
         return "game/config";
     }
 
     // PASO 2: Recibir Configuración -> Crear Sala
     @PostMapping("/game/create")
     public String createGame(@ModelAttribute com.quizlive.dto.GameConfigForm form) {
-        User host = userService.getOrCreateMockUser();
+        User host = userService.getCurrentUser();
         GameRoom room = gameService.createGameWithConfig(form, host);
         return "redirect:/game/lobby/" + room.getPin();
     }
@@ -164,6 +171,19 @@ public class GameController {
         model.addAttribute("playerId", playerId);
         model.addAttribute("player", player);
         return "player/wait";
+    }
+    
+    // API para actualizar la lista de jugadores en el lobby sin recargar (AJAX)
+    @GetMapping("/game/api/lobby/{pin}/players")
+    @ResponseBody
+    public java.util.List<String> getLobbyPlayers(@PathVariable String pin) {
+        Optional<GameRoom> roomOpt = gameService.getRoomByPin(pin);
+        if(roomOpt.isPresent()) {
+            return roomOpt.get().getPlayers().stream()
+                    .map(com.quizlive.model.Player::getNickname)
+                    .collect(java.util.stream.Collectors.toList());
+        }
+        return java.util.Collections.emptyList();
     }
     
     // 4. Pantalla de Juego (KAHOOT: muestra pregunta de la sala)

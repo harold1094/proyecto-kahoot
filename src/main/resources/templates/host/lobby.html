@@ -11,7 +11,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <!-- Refresco automático -->
-    <meta http-equiv="refresh" content="3">
+    <!-- Refresco eliminado para evitar parpadeos -->
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen">
     <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
@@ -54,15 +54,129 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Enlace para compartir -->
+                        <div class="card-glass p-6 rounded-xl mt-4">
+                            <p class="text-white/60 text-sm font-medium uppercase tracking-widest mb-3">📱 Enlace para compartir</p>
+                            <div class="flex flex-col gap-3">
+                                <div class="flex gap-2">
+                                    <input type="text" id="baseUrl" 
+                                           placeholder="Pega aquí tu URL de ngrok (ej: https://xxx.ngrok-free.dev)" 
+                                           class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                           onchange="updateShareLink()" />
+                                </div>
+                                <div id="shareLinkContainer" class="hidden">
+                                    <div class="flex items-center gap-2 bg-white/5 rounded-lg p-3">
+                                        <span class="material-symbols-outlined text-primary">link</span>
+                                        <a id="shareLink" href="#" target="_blank" class="text-primary hover:underline truncate flex-1">
+                                            Enlace generado
+                                        </a>
+                                        <button onclick="copyShareLink()" class="bg-primary/20 hover:bg-primary/30 text-primary px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                                            Copiar
+                                        </button>
+                                    </div>
+                                    <p class="text-white/40 text-xs mt-2">Comparte este enlace por WhatsApp para que se unan directamente</p>
+                                </div>
+                                <p class="text-white/40 text-xs">
+                                    💡 Si no tienes ngrok, los jugadores en la misma red WiFi pueden usar: 
+                                    <span class="text-primary font-mono" id="localIp">http://TU_IP:8080/play</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
+                <script>
+                    const roomPin = '[[${room.pin}]]';
+                    
+                    // --- Share Link Logic ---
+                    function updateShareLink() {
+                        let baseUrl = document.getElementById('baseUrl').value.trim();
+                        if (!baseUrl) {
+                            baseUrl = window.location.origin;
+                        } else {
+                            localStorage.setItem('ngrokUrl', baseUrl);
+                        }
+                        
+                        const cleanUrl = baseUrl.replace(/\/$/, '');
+                        const fullLink = cleanUrl + '/play';
+                        
+                        const linkElement = document.getElementById('shareLink');
+                        linkElement.href = fullLink;
+                        linkElement.textContent = fullLink;
+                        
+                        document.getElementById('shareLinkContainer').classList.remove('hidden');
+                    }
+                    
+                    function copyShareLink() {
+                        const link = document.getElementById('shareLink').href;
+                        navigator.clipboard.writeText(link).then(() => {
+                            const btn = document.querySelector('button[onclick="copyShareLink()"]');
+                            const originalText = btn.innerHTML;
+                            btn.innerHTML = '<span class="material-symbols-outlined text-sm">check</span> Copiado';
+                            setTimeout(() => btn.innerHTML = originalText, 2000);
+                        });
+                    }
+                    
+                    // --- AJAX Polling for Players ---
+                    function fetchPlayers() {
+                        fetch('/game/api/lobby/' + roomPin + '/players')
+                            .then(response => response.json())
+                            .then(names => {
+                                updatePlayerUI(names);
+                            })
+                            .catch(err => console.error('Error fetching players:', err));
+                    }
+
+                    function updatePlayerUI(names) {
+                        // 1. Update Count
+                        const countEl = document.getElementById('playerCount');
+                        if(countEl) countEl.textContent = names.length;
+
+                        // 2. Update Grid
+                        const gridEl = document.getElementById('playerGrid');
+                        if(!gridEl) return;
+
+                        if (names.length === 0) {
+                            gridEl.innerHTML = '<div class="col-span-full text-center py-8 text-white/30">Aún no hay nadie...</div>';
+                            return;
+                        }
+
+                        // Rebuild grid content
+                        let html = '';
+                        names.forEach(name => {
+                            html += `
+                            <div class="flex flex-col items-center gap-2 group animate__animated animate__fadeIn">
+                                 <div class="bg-primary/20 border-2 border-primary/50 group-hover:border-primary transition-all rounded-full size-20 shadow-lg flex items-center justify-center">
+                                     <span class="material-symbols-outlined text-4xl text-primary">person</span>
+                                 </div>
+                                 <span class="text-white/80 text-sm font-medium">${name}</span>
+                            </div>`;
+                        });
+                        gridEl.innerHTML = html;
+                    }
+
+                    // Init
+                    window.onload = function() {
+                        // Restore URL
+                        const savedUrl = localStorage.getItem('ngrokUrl');
+                        if (savedUrl) {
+                            document.getElementById('baseUrl').value = savedUrl;
+                        }
+                        updateShareLink();
+
+                        // Start Polling
+                        fetchPlayers(); // First immediate call
+                        setInterval(fetchPlayers, 3000); // Poll every 3s
+                    }
+                </script>
 
                 <!-- Players Section -->
                 <div class="flex flex-col gap-6">
                     <div class="flex items-center justify-between px-4">
                         <div class="flex items-center gap-3">
                             <h2 class="text-white text-2xl font-bold tracking-tight">Jugadores conectados</h2>
-                            <span class="bg-primary/20 text-primary text-sm font-bold px-3 py-1 rounded-full" th:text="${room.players.size()}">0</span>
+                            <span id="playerCount" class="bg-primary/20 text-primary text-sm font-bold px-3 py-1 rounded-full" th:text="${room.players.size()}">0</span>
                         </div>
                         <div class="flex items-center gap-2 text-white/50 text-sm italic">
                             <span class="relative flex h-3 w-3">
@@ -74,7 +188,7 @@
                     </div>
 
                     <!-- Avatar Group Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 px-4">
+                    <div id="playerGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 px-4">
                         <div th:each="player : ${room.players}" class="flex flex-col items-center gap-2 group animate__animated animate__fadeIn">
                              <!-- Placeholder Avatar -->
                              <div class="bg-primary/20 border-2 border-primary/50 group-hover:border-primary transition-all rounded-full size-20 shadow-lg flex items-center justify-center">

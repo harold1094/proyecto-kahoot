@@ -22,8 +22,9 @@ public class BlockController {
     // Listar Mis Bloques
     @GetMapping
     public String listBlocks(Model model) {
-        User currentUser = userService.getOrCreateMockUser();
+        User currentUser = userService.getCurrentUser();
         model.addAttribute("blocks", blockService.getBlocksByUser(currentUser));
+        model.addAttribute("currentUser", currentUser);
         return "blocks/list";
     }
 
@@ -37,8 +38,14 @@ public class BlockController {
     // Formulario Editar Bloque
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
+        User currentUser = userService.getCurrentUser();
         Block block = blockService.getBlockById(id);
-        // Validar que exista y pertenezca al usuario (pendiente)
+        
+        // Validar que el bloque pertenezca al usuario actual
+        if (block == null || block.getOwner() == null || !block.getOwner().getId().equals(currentUser.getId())) {
+            return "redirect:/blocks";
+        }
+        
         model.addAttribute("block", block);
         return "blocks/form";
     }
@@ -46,8 +53,7 @@ public class BlockController {
     // Guardar Bloque
     @PostMapping("/save")
     public String saveBlock(@ModelAttribute Block block) {
-        User currentUser = userService.getOrCreateMockUser();
-        // Si es edición, el ID ya viene en el objeto block
+        User currentUser = userService.getCurrentUser();
         blockService.saveBlock(block, currentUser);
         return "redirect:/blocks";
     }
@@ -55,7 +61,14 @@ public class BlockController {
     // Borrar Bloque
     @GetMapping("/delete/{id}")
     public String deleteBlock(@PathVariable Long id) {
-        blockService.deleteBlock(id);
+        User currentUser = userService.getCurrentUser();
+        Block block = blockService.getBlockById(id);
+        
+        // Validar que el bloque pertenezca al usuario actual
+        if (block != null && block.getOwner() != null && block.getOwner().getId().equals(currentUser.getId())) {
+            blockService.deleteBlock(id);
+        }
+        
         return "redirect:/blocks";
     }
 }
